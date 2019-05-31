@@ -46,7 +46,7 @@ dependencies {
 #### 指示器图片自定义
 
 
-## 技术交流
+## 技术交流（微信公众号）
 
 ![](https://github.com/panjiancool/GitRes/blob/master/qrcode_public_account.jpg)
 

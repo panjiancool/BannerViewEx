@@ -8,5 +8,8 @@
         <attr name="indicatorPaddingBottom" format="dimension" />
         <attr name="indicatorSelectRes" format="reference"/>
         <attr name="indicatorUnSelectRes" format="reference"/>
+        <attr name="indicatorDelayTime" format="integer"/>
+        <attr name="indicatorBgColor" format="color"/>
+        <attr name="indicatorBgShow" format="boolean"/>
     </declare-styleable>
 </resources>

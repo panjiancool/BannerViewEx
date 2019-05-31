@@ -24,32 +24,114 @@ import java.util.List;
  * @date 2019/5/30 - 21:35
  */
 public class BannerView extends RelativeLayout {
+
+    /**
+     * 轮播默认延时跳转时间单位ms
+     */
+    private static final int DEFAULT_DELAY_TIME_UNIT = 1000;
+    /**
+     * 轮播默认延时跳转时间5s
+     */
+    private static final int DEFAULT_DELAY_TIME = 5;
+    /**
+     * 轮播默认延时跳转时间5s
+     */
+    private static final int DEFAULT_INDICATOR_BG_COLOR = 0X33000000;
+
+    /**
+     * 视图切换ViewPager
+     */
     private ViewPager mViewPager;
-    private LinearLayout mLinearLayout;
+    /**
+     * 指示器父布局
+     */
+    private LinearLayout mIndicatorLayout;
+    /**
+     * 指示器根布局
+     */
+    private LinearLayout mIndicatorParent;
+    /**
+     * 轮播内容名称
+     */
     private TextView mBannerTv;
+    /**
+     * 上下文
+     */
     private Context mContext;
-    private ImageView[] mIndicator;
+    /**
+     * 指示器图标数据
+     */
+    private ImageView[] mIndicatorArray;
+    /**
+     * 指示器选中状态图片资源id
+     */
     private int mDotSelectRes;
-    private int mDotUnselectRes;
+    /**
+     * 指示器未选中状态图片资源id
+     */
+    private int mDotUnSelectRes;
+    /**
+     * 是否自动轮播，默认支持
+     */
     private boolean isAutoLoop;
-    private int mIndicatorPaddingLeft = 0;// indicator 距离左边的距离
-    private int mIndicatorPaddingRight = 0;//indicator 距离右边的距离
-    private int mIndicatorPaddingTop = 0;//indicator 距离上边的距离
-    private int mIndicatorPaddingBottom = 0;//indicator 距离下边的距离
+    /**
+     * indicator 距离左边的距离
+     */
+    private int mIndicatorPaddingLeft = 0;
+    /**
+     * indicator 距离右边的距离
+     */
+    private int mIndicatorPaddingRight = 0;
+    /**
+     * indicator 距离上边的距离
+     */
+    private int mIndicatorPaddingTop = 0;
+    /**
+     * indicator 距离下边的距离
+     */
+    private int mIndicatorPaddingBottom = 0;
+    /**
+     * indicator Indicator背景色
+     */
+    private int mIndicatorBgColor;
+    /**
+     * indicator Indicator背景色是否显示
+     */
+    private boolean isIndicatorBgShow;
 
+    /**
+     * 轮播内容数据集
+     */
     private List<BannerEntry> mEntryList = new ArrayList<>();
-    private OnBannerItemClickListener mOnBannerItemClickListener;
+    /**
+     * 轮播内容总量
+     */
     private int mItemCount;
+    /**
+     * 轮播延时跳转时间
+     */
+    private int mDelayTime = DEFAULT_DELAY_TIME;
+    /**
+     * item点击事件监听回调
+     */
+    private OnBannerItemClickListener mOnBannerItemClickListener;
 
+
+    /**
+     * 轮播开启
+     */
     private Runnable mRunnable = new Runnable() {
         @Override
         public void run() {
             if (!isAutoLoop) return;
             mViewPager.setCurrentItem(mViewPager.getCurrentItem() + 1);
-            postDelayed(mRunnable, 5000);
+            postDelayed(this, mDelayTime * DEFAULT_DELAY_TIME_UNIT);
         }
     };
 
+    /**
+     * 点击事件监听接口
+     */
     public interface OnBannerItemClickListener {
         void onClick(int position);
     }
@@ -63,16 +145,22 @@ public class BannerView extends RelativeLayout {
         super(context, attrs);
         this.mContext = context;
         readAttrs(context, attrs);
-        init();
+        initView();
     }
 
     public BannerView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         this.mContext = context;
         readAttrs(context, attrs);
-        init();
+        initView();
     }
 
+    /**
+     * 属性获取
+     *
+     * @param context 上下文
+     * @param attrs   属性参数
+     */
     private void readAttrs(Context context, AttributeSet attrs) {
         TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.BannerView);
         isAutoLoop = typedArray.getBoolean(R.styleable.BannerView_autoLoop, true);
@@ -81,15 +169,24 @@ public class BannerView extends RelativeLayout {
         mIndicatorPaddingTop = typedArray.getDimensionPixelSize(R.styleable.BannerView_indicatorPaddingTop, 0);
         mIndicatorPaddingBottom = typedArray.getDimensionPixelSize(R.styleable.BannerView_indicatorPaddingBottom, 0);
         mDotSelectRes = typedArray.getResourceId(R.styleable.BannerView_indicatorSelectRes, R.drawable.dot_select_image);
-        mDotUnselectRes = typedArray.getResourceId(R.styleable.BannerView_indicatorUnSelectRes, R.drawable.dot_unselect_image);
+        mDotUnSelectRes = typedArray.getResourceId(R.styleable.BannerView_indicatorUnSelectRes, R.drawable.dot_unselect_image);
+        mDelayTime = typedArray.getInteger(R.styleable.BannerView_indicatorDelayTime, DEFAULT_DELAY_TIME);
+        mIndicatorBgColor = typedArray.getColor(R.styleable.BannerView_indicatorBgColor, DEFAULT_INDICATOR_BG_COLOR);
+        isIndicatorBgShow = typedArray.getBoolean(R.styleable.BannerView_indicatorBgShow, true);
         typedArray.recycle();
     }
 
-    private void init() {
+    /**
+     * 初始化view资源
+     */
+    private void initView() {
         View view = View.inflate(mContext, R.layout.layout_bannerview, this);
         mViewPager = view.findViewById(R.id.viewpager);
-        mLinearLayout = view.findViewById(R.id.ll_points);
+        mIndicatorLayout = view.findViewById(R.id.ll_points);
+        mIndicatorParent = view.findViewById(R.id.indicator_parent);
         mBannerTv = view.findViewById(R.id.banner_text);
+        if (!isIndicatorBgShow) mIndicatorBgColor = android.R.color.transparent;
+        mIndicatorParent.setBackgroundColor(mIndicatorBgColor);
     }
 
     /**
@@ -102,12 +199,12 @@ public class BannerView extends RelativeLayout {
             mEntryList.clear();
             mEntryList.addAll(entryList);
             mItemCount = entryList.size();
-            initView();
+            initAdapter();
         }
     }
 
     /**
-     * banner item的点击监听
+     * banner item的点击监听设置
      *
      * @param onBannerItemClickListener 监听器
      */
@@ -115,7 +212,10 @@ public class BannerView extends RelativeLayout {
         mOnBannerItemClickListener = onBannerItemClickListener;
     }
 
-    private void initView() {
+    /**
+     * 初始化适配器
+     */
+    private void initAdapter() {
         // 给viewpager设置adapter
         BannerPagerAdapter bannerPagerAdapter = new BannerPagerAdapter(mEntryList, mContext);
         mViewPager.setAdapter(bannerPagerAdapter);
@@ -156,38 +256,59 @@ public class BannerView extends RelativeLayout {
         return super.dispatchTouchEvent(ev);
     }
 
+    /**
+     * 初始化底部指示器
+     *
+     * @param context 上下文
+     */
     private void initIndicator(Context context) {
-        mIndicator = new ImageView[mItemCount];
-        for (int i = 0; i < mIndicator.length; i++) {
+        mIndicatorArray = new ImageView[mItemCount];
+        for (int i = 0; i < mItemCount; i++) {
             LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(12, 12);
             params.setMargins(mIndicatorPaddingLeft, mIndicatorPaddingTop,
                     mIndicatorPaddingRight, mIndicatorPaddingBottom);
             ImageView imageView = new ImageView(context);
-            mIndicator[i] = imageView;
-            imageView.setBackgroundResource(i == 0 ? mDotSelectRes : mDotUnselectRes);
-            mLinearLayout.addView(imageView, params);
+            mIndicatorArray[i] = imageView;
+            imageView.setBackgroundResource(i == 0 ? mDotSelectRes : mDotUnSelectRes);
+            mIndicatorLayout.addView(imageView, params);
         }
-        mLinearLayout.setVisibility(mItemCount == 1 ? View.GONE : View.VISIBLE);
+        mIndicatorLayout.setVisibility(mItemCount == 1 ? View.GONE : View.VISIBLE);
     }
 
-    private void switchIndicator(int selectItems) {
-        for (int i = 0; i < mIndicator.length; i++) {
-            mIndicator[i].setBackgroundResource(i == selectItems ?
-                    mDotSelectRes : mDotUnselectRes);
+    /**
+     * 底部指示器变化
+     *
+     * @param currentPos 指示器位置
+     */
+    private void switchIndicator(int currentPos) {
+        for (int i = 0; i < mIndicatorArray.length; i++) {
+            mIndicatorArray[i].setBackgroundResource(i == currentPos ?
+                    mDotSelectRes : mDotUnSelectRes);
         }
     }
 
+    /**
+     * 轮播图片名称变化
+     *
+     * @param currentPos 轮播位置
+     */
     private void switchBannerName(int currentPos) {
         if (mEntryList != null && mEntryList.size() > currentPos) {
             mBannerTv.setText(mEntryList.get(currentPos).getName());
         }
     }
 
+    /**
+     * 开启循环
+     */
     private void startRecycle() {
         if (!isAutoLoop) return;
         postDelayed(mRunnable, 5000);
     }
 
+    /**
+     * 终止循环
+     */
     private void cancelRecycle() {
         removeCallbacks(mRunnable);
     }
@@ -202,7 +323,9 @@ public class BannerView extends RelativeLayout {
         }
     }
 
-
+    /**
+     * 轮播适配器
+     */
     private class BannerPagerAdapter extends PagerAdapter {
         private List<BannerEntry> entryList;
         private Context context;
@@ -216,14 +339,15 @@ public class BannerView extends RelativeLayout {
 
         @Override
         public int getCount() {
-            return mItemCount == 1 ? 1 : Integer.MAX_VALUE;
+            return entrySize == 1 ? 1 : Integer.MAX_VALUE;
         }
 
         @Override
-        public boolean isViewFromObject(View view, Object object) {
+        public boolean isViewFromObject(@NonNull View view, @NonNull Object object) {
             return view == object;
         }
 
+        @NonNull
         @Override
         public Object instantiateItem(@NonNull ViewGroup container, int position) {
             ImageView imageView = new ImageView(context);
@@ -244,7 +368,7 @@ public class BannerView extends RelativeLayout {
         }
 
         @Override
-        public void destroyItem(ViewGroup container, int position, Object object) {
+        public void destroyItem(@NonNull ViewGroup container, int position, @NonNull Object object) {
             container.removeView((View) object);
         }
     }

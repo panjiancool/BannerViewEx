@@ -32,7 +32,6 @@ public class MainActivity extends AppCompatActivity {
 
         BannerEntry entry2 = new BannerEntry();
         entry2.setResId(R.drawable.logo_retrofit);
-        entry2.setName("测试2");
         mEntryList.add(entry2);
 
         BannerEntry entry3 = new BannerEntry();

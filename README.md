@@ -13,11 +13,15 @@ BannerViewEx: 一款可以自定义样式的图片轮播控件。
 * [x] 支持指示器图片自定义；
 * [x] 支持指示器边距控制；
 * [x] BannerViewEx 支持4.4以上设备。
+* [x] 支持轮播时间控制；
+* [x] 支持指示器背景色自定义；
+* [x] 增加指示器背景显示控制开关；
 
 ### TODO
 * [ ] 支持图片标题开关；
-* [ ] 支持底部背景色开关；
-* [ ] 支持底部背景色配置。
+
+### ChangLog
+ [查看](ChangeLog) 
 
 ### 导入:
 Step 1. Add the JitPack repository to your build file
